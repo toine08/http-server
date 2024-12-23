@@ -1,9 +1,11 @@
 # http-server
+
 bootdev course
 
 ---
 
 ## Assignment 1.1
+
 I needed to build a simple server that only needs to send `404 not found` as a response.
 
 This server can handle multiple requests concurrently, utilizing the full capacity of the CPU. For example, Python with Django or Flask does not natively support multi-threading for handling requests.
@@ -52,3 +54,11 @@ Note: Before I have used `mux.HandleFunc()` and now only `.Handle()` because may
 
 ## Assignment 1.3
 
+For this one, I need to return an image from `/assets`.
+
+I added the logo to a folder called `/assets` and then added this line:
+```go
+mux.Handle("/assets/", http.FileServer(http.Dir(".")))
+```
+Personal comment:
+I didn't understand at first. I tried to use `http.FileServer()` without moving `logo.png` to the folder but didn't find any solution. Maybe in the future.
