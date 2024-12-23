@@ -62,3 +62,31 @@ mux.Handle("/assets/", http.FileServer(http.Dir(".")))
 ```
 Personal comment:
 I didn't understand at first. I tried to use `http.FileServer()` without moving `logo.png` to the folder but didn't find any solution. Maybe in the future.
+
+## Assignment 1.4
+
+For this one, I had to add a readiness endpoint accessible from `/healthz` to check if our server is ready to receive some requests. I also had to update the file server path to avoid potential conflict with the file server handler. Now instead of using `/`, we go through `/app/`.
+
+Here is the code for this version:
+```go
+func main() {
+	mux := http.NewServeMux()
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+    // Serve files from the current directory under the /app/ path, stripping the /app/ prefix
+	mux.Handle("/app/", http.StripPrefix("/app/", http.FileServer(http.Dir("."))))
+    // Serve the logo.png file at the /assets path
+	mux.Handle("/assets/", http.FileServer(http.Dir(".")))
+    // Add a readiness endpoint at /healthz to check if the server is ready to receive requests
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+	server.ListenAndServe()
+}
+```
+
+Personal comment: I didn't understand clearly what I was doing, but with the help of the docs and the chatbot on boot.dev, it was easier to understand. 
