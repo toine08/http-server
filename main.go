@@ -11,8 +11,8 @@ func main(){
 		Handler:mux,
 	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request){
-			http.NotFound(w,req)
-			return
+		http.NotFound(w,req)
+			
 	})
 	server.ListenAndServe()
 }
