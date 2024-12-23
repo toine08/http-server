@@ -1,6 +1,7 @@
 # http-server
 bootdev course
 
+---
 
 ## Assignment 1.1
 I needed to build a simple server that only needs to send `404 not found` as a response.
@@ -28,5 +29,26 @@ func main() {
 }
 ```
 
-## Assignement 1.2
+## Assignment 1.2
+
+For this assignment, I needed to serve an HTML file called `index.html` when it's requested at the root.
+
+Here is the main function:
+
+```go
+func main() {
+	mux := http.NewServeMux()
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+    // Use Handle to serve the HTML file at the root path
+	mux.Handle("/", http.FileServer(http.Dir(".")))
+	server.ListenAndServe()
+}
+```
+
+Note: Before I have used `mux.HandleFunc()` and now only `.Handle()` because maybe it was overkill. In Assignment 1.2, `mux.Handle()` is used because `http.FileServer` returns an `http.Handler`, which is directly compatible with `mux.Handle()`.
+
+## Assignment 1.3
 
