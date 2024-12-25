@@ -198,3 +198,9 @@ func main() {
 ```
 #### Note:
  This assignment was quite challenging. It was rated 9/10 in difficulty on the course, and I felt a bit lost at times. I tried to avoid using AI assistance, but eventually, I needed help to understand some concepts. I am starting to grasp why certain functions are created, but it still feels somewhat unclear.
+
+ ## Assignment 2.2
+
+ For this one I needed to precise which method use for which route, to avoid any issue. 
+
+ 
