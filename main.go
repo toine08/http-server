@@ -42,13 +42,13 @@ func main() {
 	// Serve the logo.png file at the /assets path
 	mux.Handle("/assets/", http.FileServer(http.Dir(".")))
 	// Add a readiness endpoint at /healthz to check if the server is ready to receive requests
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc("GET /api/healthz", func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
-	mux.HandleFunc("GET /metrics", cfg.handleMetrics)
-	mux.HandleFunc("POST /reset", cfg.handleReset)
+	mux.HandleFunc("GET /api/metrics", cfg.handleMetrics)
+	mux.HandleFunc("POST /api/reset", cfg.handleReset)
 	// Start the server and listen on the specified port
 	server.ListenAndServe()
 }

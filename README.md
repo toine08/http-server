@@ -203,4 +203,8 @@ func main() {
 
  For this one I needed to precise which method use for which route, to avoid any issue. 
 
+ This one was easy in golang for the patern you can precise the method, the route and even the port so I only had to add GET/POST to the different route where it was ask to. 
+
+ ```go
  
+ ```
