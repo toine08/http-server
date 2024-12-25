@@ -199,12 +199,51 @@ func main() {
 #### Note:
  This assignment was quite challenging. It was rated 9/10 in difficulty on the course, and I felt a bit lost at times. I tried to avoid using AI assistance, but eventually, I needed help to understand some concepts. I am starting to grasp why certain functions are created, but it still feels somewhat unclear.
 
- ## Assignment 2.2
+## Assignment 2.2
 
- For this one I needed to precise which method use for which route, to avoid any issue. 
+ For this one, I needed to specify which method to use for which route to avoid any issues.
 
- This one was easy in golang for the patern you can precise the method, the route and even the port so I only had to add GET/POST to the different route where it was ask to. 
+ This was easy in Golang because you can specify the method, the route, and even the port. So, I only had to add GET/POST to the different routes where it was required.
 
  ```go
- 
+ func main() {
+	//...existing code...
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+	//added the method GET for /metrics and /healthz
+	mux.HandleFunc("GET /metrics", cfg.handleMetrics)
+	//added the method POST for the reset route
+	mux.HandleFunc("POST /reset", cfg.handleReset)
+	//...existing code
+}
  ```
+
+#### Note:
+This was not really hard and clear to understand. At first, I thought I needed to handle the case where the method was not the correct one to return the desired HTTP code.
+
+## Assignment 2.3
+
+This one was also an easy one. I had to add the /api/ route before healthz, metrics, and reset.
+
+ ```go
+  func main() {
+	//...existing code...
+	mux.HandleFunc("GET /api/healthz", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+	//added the method GET for /metrics and /healthz
+	mux.HandleFunc("GET /api/metrics", cfg.handleMetrics)
+	//added the method POST for the reset route
+	mux.HandleFunc("POST /api/reset", cfg.handleReset)
+	//...existing code
+}
+ ```
+
+#### Note:
+
+ This one was really not hard to understand. Nice to have an easy one haha.
