@@ -247,3 +247,45 @@ This one was also an easy one. I had to add the /api/ route before healthz, metr
 #### Note:
 
  This one was really not hard to understand. Nice to have an easy one haha.
+
+## Assignment 3.4
+
+This one was a bit difficult. I didn't know how to use the HTML template and thought maybe I needed to create a new HTML file. I had to use AI to inform myself.
+
+### Assignment:
+
+Swap out the GET /api/metrics endpoint, which just returns plain text, for a GET /admin/metrics that returns HTML to be rendered in the browser.
+
+Update the POST /api/reset to POST /admin/reset. Its functionality should not change.
+
+```go
+//...New version of function handleMetrics:
+func (cfg *apiConfig) handleMetrics(w http.ResponseWriter, req *http.Request) {
+
+	hits := cfg.fileserverHits.Load()
+	html := fmt.Sprintf(`<html>
+  <body>
+	<h1>Welcome, Chirpy Admin</h1>
+	<p>Chirpy has been visited %d times!</p>
+  </body>
+</html>`, hits)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(html))
+}
+
+func main(){
+	//...existing code...
+	mux.HandleFunc("GET /admin/metrics", cfg.handleMetrics)
+	mux.HandleFunc("POST /admin/reset", cfg.handleReset)
+	//...existing code...
+}
+```
+
+#### Note:
+I thought it would be hard, but it wasn't the case. It was just difficult to know how to integrate the HTML in the function. Sadly, I had to use AI...
+
+
+
+
