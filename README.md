@@ -286,7 +286,7 @@ func main(){
 #### Note:
 I thought it would be hard, but it wasn't the case. It was just difficult to know how to integrate the HTML in the function. Sadly, I had to use AI...
 
-## Assignment 3.5
+## Assignment 4.2
 
 Well, this one was not an easy one but definitely interesting. I had to use the AI chat from boot.dev to get some help.
 
