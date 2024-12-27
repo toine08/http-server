@@ -366,6 +366,57 @@ validateString := params.Body
 #### Note:
 Good to feel confident on an assignment haha.
 
+## Assignment 5.3
+
+Wow this one was a lot installation and setting things up. I had trouble to install postgresql because I wasn't paying attention to the logs from the brew install (like exporting to the .zshrc the config to use the command line). 
+
+### Assignment:
+Well I had to install postgresql, goose (actually it was the precedent assignment), sqlc and add some sql file and folder and finally add some imports and code in the main function and the type apiConfig struct
+
+```go
+//... existing code
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
+	"sync/atomic"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/toine08/http-server/internal/database"
+)
+
+type apiConfig struct {
+	fileserverHits atomic.Int32
+	dbQueries      *database.Queries
+}
+//...existing code...
+func main() {
+	//load env key
+	godotenv.Load()
+	cfg := &apiConfig{}
+	//get the wanted env variable
+	dbURL := os.Getenv("DB_URL")
+	//open the connection to the db with the env variable
+	db, err := sql.Open("postgres", dbURL)
+	//stop server if there is an error
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+	}
+	cfg.dbQueries = database.New(db)
+	//...existing code...
+}
+
+```
+
+#### Note:
+
+Well this was a lot of installation, at some point I was lost in the indication and things I have to do. But I did it, I had to use AI but I had trouble installing postgresql. 
+
+
 
 
 

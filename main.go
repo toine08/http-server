@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -89,7 +90,7 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		fmt.Errorf("Something went wrong: %v", err)
+		log.Fatalf("Failed to connect to the database: %v", err)
 	}
 	cfg.dbQueries = database.New(db)
 	mux := http.NewServeMux()
