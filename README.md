@@ -286,6 +286,50 @@ func main(){
 #### Note:
 I thought it would be hard, but it wasn't the case. It was just difficult to know how to integrate the HTML in the function. Sadly, I had to use AI...
 
+## Assignment 3.5
+
+Well, this one was not an easy one but definitely interesting. I had to use the AI chat from boot.dev to get some help.
+
+### Assignment:
+Add a new endpoint to the Chirpy API that accepts a POST request at /api/validate_chirp. It should expect a JSON body of this shape:
+
+```go
+
+//I never know how to name my function...
+func handleValidation(w http.ResponseWriter, req *http.Request) {
+	type parameters struct {
+		Body string `json:"body"`
+	}
+	decoder := json.NewDecoder(req.Body)
+	params := parameters{}
+
+	err := decoder.Decode(&params)
+	w.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		w.WriteHeader(400)
+		w.Write([]byte(`{"error": "Something went wrong"}`))
+		return
+
+	}
+	if len(params.Body) > 140 {
+		w.WriteHeader(400)
+		w.Write([]byte(`{"error": "Chirp is too long"}`))
+		return
+	}
+	w.WriteHeader(200)
+	w.Write([]byte(`{"valid":true}`))
+
+}
+
+
+//add this line in the main function
+mux.HandleFunc("POST /api/validate_chirp", handleValidation)
+
+```
+#### Note:
+
+This one I thought it was going to be harder than that. Of course, I used AI but I was more using it like a counselor than a teacher. I don't like writing some code if it's useless so I ask for its opinion before writing my code. But it also helped me with some debugging because at first, I thought the function was not working correctly but I was just using the wrong tab on Thunder Client...
+
 
 
 

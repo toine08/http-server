@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync/atomic"
@@ -8,6 +9,31 @@ import (
 
 type apiConfig struct {
 	fileserverHits atomic.Int32
+}
+
+func handleValidation(w http.ResponseWriter, req *http.Request) {
+	type parameters struct {
+		Body string `json:"body"`
+	}
+	decoder := json.NewDecoder(req.Body)
+	params := parameters{}
+
+	err := decoder.Decode(&params)
+	w.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		w.WriteHeader(400)
+		w.Write([]byte(`{"error": "Something went wrong"}`))
+		return
+
+	}
+	if len(params.Body) > 140 {
+		w.WriteHeader(400)
+		w.Write([]byte(`{"error": "Chirp is too long"}`))
+		return
+	}
+	w.WriteHeader(200)
+	w.Write([]byte(`{"valid":true}`))
+
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -57,6 +83,7 @@ func main() {
 	})
 	mux.HandleFunc("GET /admin/metrics", cfg.handleMetrics)
 	mux.HandleFunc("POST /admin/reset", cfg.handleReset)
+	mux.HandleFunc("POST /api/validate_chirp", handleValidation)
 	// Start the server and listen on the specified port
 	server.ListenAndServe()
 }
