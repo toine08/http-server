@@ -330,6 +330,43 @@ mux.HandleFunc("POST /api/validate_chirp", handleValidation)
 
 This one I thought it was going to be harder than that. Of course, I used AI but I was more using it like a counselor than a teacher. I don't like writing some code if it's useless so I ask for its opinion before writing my code. But it also helped me with some debugging because at first, I thought the function was not working correctly but I was just using the wrong tab on Thunder Client...
 
+## Assignment 4.6
+
+This one was nice, I was able to resolve it almost alone. Just needed to google 2-3 things to find out how to loop over a string.
+
+### Assignment:
+We need to update the /api/validate_chirp endpoint to replace all "profane" words with 4 asterisks: `****`.
+
+Assuming the length validation passed, replace any of the following words in the Chirp with the static 4-character string `****`:
+
+	kerfuffle
+	sharbert
+	fornax
+
+Be sure to match against uppercase versions of the words as well, but not punctuation. "Sharbert!" does not need to be replaced, we'll consider it a different word due to the exclamation point. Finally, instead of the valid boolean, your handler should return the cleaned version of the text in a JSON response.
+
+```go
+func handleValidation(w http.ResponseWriter, req *http.Request) {
+//...existing code...
+validateString := params.Body
+	words := strings.Split(validateString, " ")
+	for i, word := range words {
+		if strings.ToLower(word) == "kerfuffle" || strings.ToLower(word) == "sharbert" || strings.ToLower(word) == "fornax" {
+			words[i] = "****"
+		}
+
+	}
+	validateString = strings.Join(words, " ")
+	returnedString := fmt.Sprintf(`{"cleaned_body": "%s"}`, validateString)
+	w.WriteHeader(200)
+	w.Write([]byte(returnedString))
+//...existing code...
+}
+```
+#### Note:
+Good to feel confident on an assignment haha.
+
+
 
 
 

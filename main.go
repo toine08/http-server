@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync/atomic"
 )
 
@@ -31,8 +32,18 @@ func handleValidation(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(`{"error": "Chirp is too long"}`))
 		return
 	}
+	validateString := params.Body
+	words := strings.Split(validateString, " ")
+	for i, word := range words {
+		if strings.ToLower(word) == "kerfuffle" || strings.ToLower(word) == "sharbert" || strings.ToLower(word) == "fornax" {
+			words[i] = "****"
+		}
+
+	}
+	validateString = strings.Join(words, " ")
+	returnedString := fmt.Sprintf(`{"cleaned_body": "%s"}`, validateString)
 	w.WriteHeader(200)
-	w.Write([]byte(`{"valid":true}`))
+	w.Write([]byte(returnedString))
 
 }
 
