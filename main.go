@@ -1,15 +1,22 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"sync/atomic"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/toine08/http-server/internal/database"
 )
 
 type apiConfig struct {
 	fileserverHits atomic.Int32
+	dbQueries      *database.Queries
 }
 
 func handleValidation(w http.ResponseWriter, req *http.Request) {
@@ -77,12 +84,19 @@ func (cfg *apiConfig) handleReset(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	godotenv.Load()
+	cfg := &apiConfig{}
+	dbURL := os.Getenv("DB_URL")
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		fmt.Errorf("Something went wrong: %v", err)
+	}
+	cfg.dbQueries = database.New(db)
 	mux := http.NewServeMux()
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: mux,
 	}
-	cfg := &apiConfig{}
 	mux.Handle("/app/", cfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(".")))))
 	// Serve the logo.png file at the /assets path
 	mux.Handle("/assets/", http.FileServer(http.Dir(".")))
