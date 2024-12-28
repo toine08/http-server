@@ -2,12 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"sync/atomic"
 
 	"github.com/joho/godotenv"
@@ -18,41 +16,7 @@ import (
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
-}
-
-func handleValidation(w http.ResponseWriter, req *http.Request) {
-	type parameters struct {
-		Body string `json:"body"`
-	}
-	decoder := json.NewDecoder(req.Body)
-	params := parameters{}
-
-	err := decoder.Decode(&params)
-	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		w.WriteHeader(400)
-		w.Write([]byte(`{"error": "Something went wrong"}`))
-		return
-
-	}
-	if len(params.Body) > 140 {
-		w.WriteHeader(400)
-		w.Write([]byte(`{"error": "Chirp is too long"}`))
-		return
-	}
-	validateString := params.Body
-	words := strings.Split(validateString, " ")
-	for i, word := range words {
-		if strings.ToLower(word) == "kerfuffle" || strings.ToLower(word) == "sharbert" || strings.ToLower(word) == "fornax" {
-			words[i] = "****"
-		}
-
-	}
-	validateString = strings.Join(words, " ")
-	returnedString := fmt.Sprintf(`{"cleaned_body": "%s"}`, validateString)
-	w.WriteHeader(200)
-	w.Write([]byte(returnedString))
-
+	platform       string
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -78,19 +42,31 @@ func (cfg *apiConfig) handleMetrics(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(html))
 }
 func (cfg *apiConfig) handleReset(w http.ResponseWriter, req *http.Request) {
-	cfg.fileserverHits.Store(0)
+	log.Printf("Platform is set to: %s", cfg.platform)
+	if cfg.platform != "dev" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	err := cfg.dbQueries.DeleteUsers(req.Context())
+	if err != nil {
+		log.Println("Error while deleting from the DB", err)
+	}
 	w.Header().Set("Content-Type", "text/plain;charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("Hits reset to 0")))
+	w.Write([]byte(fmt.Sprintf("Users table clear")))
 }
 
 func main() {
 	godotenv.Load()
-	cfg := &apiConfig{}
 	dbURL := os.Getenv("DB_URL")
+	plateform := os.Getenv("PLATEFORM")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
+	}
+	cfg := &apiConfig{
+		platform:       plateform,
+		fileserverHits: atomic.Int32{},
 	}
 	cfg.dbQueries = database.New(db)
 	mux := http.NewServeMux()
@@ -109,7 +85,9 @@ func main() {
 	})
 	mux.HandleFunc("GET /admin/metrics", cfg.handleMetrics)
 	mux.HandleFunc("POST /admin/reset", cfg.handleReset)
-	mux.HandleFunc("POST /api/validate_chirp", handleValidation)
+	//mux.HandleFunc("POST /api/validate_chirp", handleValidation)
+	mux.HandleFunc("POST /api/users", cfg.handlerUsersCreate)
+	mux.HandleFunc("POST /api/chirps", cfg.handlerChirpsCreate)
 	// Start the server and listen on the specified port
 	server.ListenAndServe()
 }
