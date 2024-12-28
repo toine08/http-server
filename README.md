@@ -484,7 +484,7 @@ With this code, I was able to retrieve all the chirps created in the DB. Which i
 
 A lot of things to do in this chapter !
 
-## Assignment:
+### Assignment:
 Basically adding the route to return a chirp by an ID
 
 ```go
@@ -528,5 +528,111 @@ Well this one was nice to do. I had to use AI to get some info about the functio
 It feels great to code and to feel better at this. 
 
 
+## Assignment 6.1
 
+Soooo, this one was hard. At first, I thought it would be easy to do, but after a few tries, I changed my mind. I got some issues with the `/api/login`, but the issue was coming from `handle_users_create.go`...
 
+### Assignment:
+Update the POST /api/users endpoint. The body parameters should now require a new password field. Add a POST /api/login endpoint. This endpoint should allow a user to log in. In a future exercise, this endpoint will be used to give the user a token that they can use to make authenticated requests. For now, let's just make sure password validation is working. It should accept this body:
+```json
+{
+	"password": "04234",
+	"email": "lane@example.com"
+}
+```
+I have updated the table users, see `003_add_hashed_password.sql`. I have created the query to getUserByEmail:
+```sql
+-- name: GetUserByEmail :one
+SELECT id, created_at, updated_at, email, hashed_password FROM users WHERE email =$1;
+```
+
+I have created two files in `internal/auth`:
+- hashPassword.go
+- checkHashPassword.go
+
+```go
+//both files in here:
+func HashPassword(password string) (string, error) {
+	bytePassword := []byte(password)
+	hash, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
+	if (err != nil) {
+		return password, errors.New("Error while hashing password")
+	}
+	return string(hash), nil
+}
+
+func CheckPasswordHash(password, hash string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+}
+```
+
+I have updated the `handle_user_create.go`:
+```go
+//had to update the User struct...
+type User struct {
+	ID             uuid.UUID `json:"id"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	Email          string    `json:"email"`
+	HashedPassword string    `json:"-"`
+}
+
+func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
+	type parameters struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	//...existing code
+	hashedPassword, err := auth.HashPassword(params.Password)
+	
+	user, err := cfg.dbQueries.CreateUser(r.Context(), database.CreateUserParams{
+		Email:          params.Email,
+		HashedPassword: hashedPassword,
+	})
+	//...existing code
+}
+```
+```go
+func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
+	type parameters struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	type response struct {
+		User
+	}
+
+	decoder := json.NewDecoder(req.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
+		return
+	}
+	user, err := cfg.dbQueries.GetUserByEmail(req.Context(), params.Email)
+	if err != nil {
+		fmt.Printf("Error finding user: %v\n", err) // Debug print
+		respondWithError(w, http.StatusUnauthorized, "Incorrect email or password", nil)
+		return
+	}
+
+	err = auth.CheckPasswordHash(params.Password, user.HashedPassword)
+	if err != nil {
+		fmt.Printf("Error comparing passwords: %v\n", err)
+		respondWithError(w, http.StatusUnauthorized, "Incorrect email or password", nil)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, response{
+		User: User{
+			ID:        user.ID,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			Email:     user.Email,
+		},
+	})
+}
+```
+
+#### Note:
+This one was hard. I had to use AI to get some help for debugging; otherwise, I would have gone crazy before finding the error...
