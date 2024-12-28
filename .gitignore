@@ -2,3 +2,4 @@
 *out
 /internal/*
 *http-server
+/build/*
