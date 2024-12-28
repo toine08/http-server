@@ -88,6 +88,7 @@ func main() {
 	//mux.HandleFunc("POST /api/validate_chirp", handleValidation)
 	mux.HandleFunc("POST /api/users", cfg.handlerUsersCreate)
 	mux.HandleFunc("POST /api/chirps", cfg.handlerChirpsCreate)
+	mux.HandleFunc("GET /api/chirps", cfg.handleAllChirps)
 	// Start the server and listen on the specified port
 	server.ListenAndServe()
 }
