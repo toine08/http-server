@@ -418,15 +418,67 @@ Well this was a lot of installation, at some point I was lost in the indication 
 
 ## Assignment 5.5
 
-Check Assignment 5.6....
+Check Assignment 5.6...
 
-## Assignement 5.6
+## Assignment 5.6
 
-Well this one was hard. Too hard I had to show the answers. But in this bad news I have discovered that I can work in other files...
-I mean I know it's possible but didn't know this for go. I haven't write anything for the `Assignment 5.5` because it was creating a user. And I wasn't able to resolve the 5.6 certainly because my function wasn't correct sadly. 
+Well, this one was hard. Too hard, I had to look at the answers. But in this bad news, I discovered that I can work in other files...
+I mean, I know it's possible, but I didn't know this for Go. I haven't written anything for `Assignment 5.5` because it was about creating a user, and I wasn't able to resolve 5.6, certainly because my function wasn't correct, sadly.
 
+Also, I won't show the code for this one because it would be too long. Sorry.
 
-Also I won't show the code for this one because it would be too long. Sorry
+## Assignment 5.9
+
+Ok, back to coding this time (not that I haven't coded for 5.5 or 5.6, but I didn't count since I had to use the provided answers...)
+
+### Assignment
+Add a new query that retrieves all chirps in ascending order by created_at.
+Add a GET /api/chirps endpoint that returns all chirps in the database. It should return them in the same structure as the POST /api/chirps endpoint, but as an array. Use a 200 status code for success. Order them by created_at in ascending order.
+
+```sql
+-- name: AllChirps :many
+SELECT * FROM chirps
+ORDER BY created_at ASC;
+```
+
+```go
+//file handle_chirps_allchirps.go
+package main
+
+import "net/http"
+
+func (cfg *apiConfig) handleAllChirps(w http.ResponseWriter, r *http.Request) {
+	var chirps []Chirp
+	rows, err := cfg.dbQueries.AllChirps(r.Context())
+	if err != nil {
+		respondWithError(w, 500, "Error retrieving data", err)
+		return
+	}
+	for _, row := range rows {
+		var chirp Chirp
+		chirp.ID = row.ID
+		chirp.CreatedAt = row.CreatedAt
+		chirp.UpdatedAt = row.UpdatedAt
+		chirp.Body = row.Body
+		chirp.UserID = row.UserID
+		chirps = append(chirps, chirp)
+	}
+
+	respondWithJSON(w, 200, chirps)
+}
+
+//file main.go
+
+//existing code...
+func main(){
+	//existing code...
+	mux.HandleFunc("GET /api/chirps", cfg.handleAllChirps)
+	//existing code...
+}
+```
+
+#### Note:
+With this code, I was able to retrieve all the chirps created in the DB. Which is nice, hehe. I had to use AI to help me because the course doesn't explain how to manage data received from the DB. Maybe some hints would have been nice. But once I figured that out, it was pretty easy.
 
 
 
