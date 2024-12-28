@@ -1,4 +1,4 @@
 *.env*
-out
+*out*
 /internal/*
-http-server
+*http-server*
