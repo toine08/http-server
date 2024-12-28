@@ -480,6 +480,53 @@ func main(){
 #### Note:
 With this code, I was able to retrieve all the chirps created in the DB. Which is nice, hehe. I had to use AI to help me because the course doesn't explain how to manage data received from the DB. Maybe some hints would have been nice. But once I figured that out, it was pretty easy.
 
+## Assignment 5.10
+
+A lot of things to do in this chapter !
+
+## Assignment:
+Basically adding the route to return a chirp by an ID
+
+```go
+//handle_chirps_chirpsbyid.go
+func (cfg *apiConfig) handleChipsById(w http.ResponseWriter, r *http.Request) {
+	chirpId := r.PathValue("chirpID")
+	uuid, err := uuid.Parse(chirpId)
+	if err != nil {
+		respondWithError(w, 404, "Error while getting the value", err)
+		return
+	}
+	row, err := cfg.dbQueries.ChirpByID(r.Context(), uuid)
+	if err != nil {
+		respondWithError(w, 500, "Error there is no ID who match the chirp", err)
+	}
+	respondWithJSON(w, 200, Chirp{
+		ID:        row.ID,
+		CreatedAt: row.CreatedAt,
+		UpdatedAt: row.UpdatedAt,
+		Body:      row.Body,
+		UserID:    row.UserID,
+	})
+
+}
+
+
+//main.go
+//main function as always:
+	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handleChipsById)
+
+```
+```sql
+-- /chirp.sql
+-- name: ChirpByID :one
+SELECT id, created_at, updated_at, body, user_id FROM chirps WHERE id = $1;
+```
+
+#### Note:
+Well this one was nice to do. I had to use AI to get some info about the function `http.Request.PathValue` and how to use it because the doc wasn't giving any example. I also use the AI to write the query for myself...(Probably the next course will be SQL haha).
+
+It feels great to code and to feel better at this. 
+
 
 
 
