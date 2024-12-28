@@ -416,7 +416,17 @@ func main() {
 
 Well this was a lot of installation, at some point I was lost in the indication and things I have to do. But I did it, I had to use AI but I had trouble installing postgresql. 
 
+## Assignment 5.5
 
+Check Assignment 5.6....
+
+## Assignement 5.6
+
+Well this one was hard. Too hard I had to show the answers. But in this bad news I have discovered that I can work in other files...
+I mean I know it's possible but didn't know this for go. I haven't write anything for the `Assignment 5.5` because it was creating a user. And I wasn't able to resolve the 5.6 certainly because my function wasn't correct sadly. 
+
+
+Also I won't show the code for this one because it would be too long. Sorry
 
 
 
