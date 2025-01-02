@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/toine08/http-server/internal/auth"
 	"github.com/toine08/http-server/internal/database"
 )
 
@@ -20,34 +22,51 @@ type Chirp struct {
 }
 
 func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
+	// Fetch and validate JWT from the Authorization header
+	tokenString, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authorization header missing or incorrectly formatted", nil)
+		return
+	}
+
+	// Validate the extracted JWT
+	userID, err := auth.ValidateJWT(tokenString, os.Getenv("TOKEN_SECRET"))
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid or expired token", nil)
+		return
+	}
+
+	// Decode the body of the request into parameters struct
 	type parameters struct {
-		Body   string    `json:"body"`
-		UserID uuid.UUID `json:"user_id"`
+		Body string `json:"body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
 		return
 	}
 
+	// Validate and clean the chirp
 	cleaned, err := validateChirp(params.Body)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error(), err)
 		return
 	}
 
+	// Create chirp with validated userID from JWT
 	chirp, err := cfg.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:   cleaned,
-		UserID: params.UserID,
+		UserID: userID,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create chirp", err)
 		return
 	}
 
+	// Respond with JSON of the created chirp
 	respondWithJSON(w, http.StatusCreated, Chirp{
 		ID:        chirp.ID,
 		CreatedAt: chirp.CreatedAt,
