@@ -636,3 +636,21 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 
 #### Note:
 This one was hard. I had to use AI to get some help for debugging; otherwise, I would have gone crazy before finding the error...
+
+## Assignment 6.6
+
+The assignment was quite extensive, so here is a summary:
+
+Add JWT functionalities and update login and chirps to work with JWT.
+
+Here are the files created:
+
+- Added files to the auth package:
+	- `makeJWT.go`
+	- `validateJWT.go`
+	- `getBearerToken.go`
+- Added `handle_users_authentication.go`
+- Added a new function to the queries to get user by ID.
+
+#### Note:
+This one was really challenging. There were a lot of things to do, and I felt lost at times. I am not happy with my performance. Even though I knew where to add certain things, I didn't know how to use some functions. I had to rely heavily on AI. Maybe going all the way through the HTTP server wasn't the best idea...
