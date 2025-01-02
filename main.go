@@ -17,6 +17,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
 	platform       string
+	tokenSecret    string
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -60,12 +61,14 @@ func main() {
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
 	plateform := os.Getenv("PLATEFORM")
+	tokenSecret := os.Getenv("TOKEN_SECRET")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
 	cfg := &apiConfig{
 		platform:       plateform,
+		tokenSecret:    tokenSecret,
 		fileserverHits: atomic.Int32{},
 	}
 	cfg.dbQueries = database.New(db)
