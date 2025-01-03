@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/toine08/http-server/internal/auth"
 )
@@ -14,7 +13,7 @@ func (cfg *apiConfig) handleAuthenticatedRequest(w http.ResponseWriter, req *htt
 		return
 	}
 
-	userID, err := auth.ValidateJWT(tokenString, os.Getenv("TOKEN_SECRET"))
+	userID, err := auth.ValidateJWT(tokenString, cfg.tokenSecret)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Invalid or expired token", err)
 		return
