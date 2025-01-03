@@ -431,7 +431,7 @@ Also, I won't show the code for this one because it would be too long. Sorry.
 
 Ok, back to coding this time (not that I haven't coded for 5.5 or 5.6, but I didn't count since I had to use the provided answers...)
 
-### Assignment
+### Assignment:
 Add a new query that retrieves all chirps in ascending order by created_at.
 Add a GET /api/chirps endpoint that returns all chirps in the database. It should return them in the same structure as the POST /api/chirps endpoint, but as an array. Use a 200 status code for success. Order them by created_at in ascending order.
 
@@ -489,7 +489,7 @@ Basically adding the route to return a chirp by an ID
 
 ```go
 //handle_chirps_chirpsbyid.go
-func (cfg *apiConfig) handleChipsById(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handleChirpsById(w http.ResponseWriter, r *http.Request) {
 	chirpId := r.PathValue("chirpID")
 	uuid, err := uuid.Parse(chirpId)
 	if err != nil {
@@ -513,7 +513,7 @@ func (cfg *apiConfig) handleChipsById(w http.ResponseWriter, r *http.Request) {
 
 //main.go
 //main function as always:
-	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handleChipsById)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handleChirpsById)
 
 ```
 ```sql
@@ -763,4 +763,53 @@ RETURNING *;
 I have also updated main.go to add the route
 
 #### Note:
-Well, this one was not easy but not hard. Maybe I should start to write what I have to do because when I start I have some good ideas and I am inspired but when I am working on it I feel lost. Otherwise, pretty nice chapter.
+This one was moderately challenging. I've learned that I should start by writing down my tasks before diving into coding. When I first start, I usually have good ideas and feel inspired, but as I work on the implementation, I sometimes lose direction. Despite this, it was a satisfying chapter to complete.
+
+## Assignment 7.4
+
+I'm pleased with how this turned out!
+
+### Assignment:
+- Add a new DELETE /api/chirps/{chirpID} route to your server that deletes a chirp from the database by its id.
+
+Here is my code:
+```go
+func (cfg *apiConfig) handleDeleteChirpsById(w http.ResponseWriter, req *http.Request) {
+	//verify identity
+	tokenString, err := auth.GetBearerToken(req.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "No valid bearer token provided", err)
+		return
+	}
+
+	claims, err := auth.ValidateJWT(tokenString, cfg.tokenSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid or expired token", err)
+		return
+	}
+	//get the ChirpID
+	chirpId := req.PathValue("chirpID")
+	uuid, err := uuid.Parse(chirpId)
+	if err != nil {
+		respondWithError(w, 404, "Error while getting the value", err)
+		return
+	}
+	if _, err := cfg.dbQueries.DeleteChirpByID(req.Context(), database.DeleteChirpByIDParams{
+		ID:     uuid,
+		UserID: claims,
+	}); err != nil {
+		respondWithError(w, http.StatusForbidden, "Error while deleting the chirp", err)
+		return
+	}
+	respondWithJSON(w, http.StatusNoContent, nil)
+}
+```
+```sql
+-- name: DeleteChirpByID :one
+DELETE FROM chirps WHERE id = $1 AND user_id = $2
+RETURNING *;
+```
+
+#### Note:
+
+Well this one was also not that hard but not easy. I have avoided to use AI but It's pretty useful for writing correct sql queries hehe. I am pretty proud of what I do and I haven't felt lost so that's cool. 
