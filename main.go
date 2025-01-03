@@ -98,7 +98,8 @@ func main() {
 
 	mux.HandleFunc("POST /api/chirps", cfg.handlerChirpsCreate)
 	mux.HandleFunc("GET /api/chirps", cfg.handleAllChirps)
-	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handleChipsById)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handleChirpsById)
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.handleDeleteChirpsById)
 
 	// Start the server and listen on the specified port
 	server.ListenAndServe()
