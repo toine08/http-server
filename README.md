@@ -685,3 +685,82 @@ For the code, sadly there are too many things I have updated, but here is what I
 
 #### Note:
 This one was hard, but clearer than the previous one. I still had to use AI, but this was to insert debug and help to know how to use a function. I really enjoy coding in Go, but I know I have some improvements to make.
+
+## Assignment 7.1
+
+### Assignment:
+Add a PUT /api/users endpoint so that users can update their own (but not others') email and password. It requires:
+
+Here is my code:
+```go
+func (cfg *apiConfig) handleUpdateUser(w http.ResponseWriter, req *http.Request) {
+	type parameters struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	type userResponse struct {
+		ID        uuid.UUID `json:"id"`
+		Email     string    `json:"email"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}
+
+	tokenString, err := auth.GetBearerToken(req.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "No valid bearer token provided", err)
+		return
+	}
+
+	claims, err := auth.ValidateJWT(tokenString, cfg.tokenSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid or expired token", err)
+		return
+	}
+
+	decoder := json.NewDecoder(req.Body)
+	params := parameters{}
+	err = decoder.Decode(&params)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
+		return
+	}
+
+	hashedPassword, err := auth.HashPassword(params.Password)
+
+	newUser, err := cfg.dbQueries.UpdateUser(req.Context(), database.UpdateUserParams{
+		ID:             claims,
+		Email:          params.Email,
+		HashedPassword: hashedPassword,
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Error while updating the password", err)
+		return
+	}
+
+	response := userResponse{
+		ID:        newUser.ID,
+		Email:     newUser.Email,
+		CreatedAt: newUser.CreatedAt,
+		UpdatedAt: newUser.UpdatedAt,
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
+
+}
+```
+
+```sql
+-- name: UpdateUser :one
+UPDATE users
+SET email = $2, hashed_password = $3, updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+```
+
+I have also updated main.go to add the route
+
+#### Note:
+Well, this one was not easy but not hard. Maybe I should start to write what I have to do because when I start I have some good ideas and I am inspired but when I am working on it I feel lost. Otherwise, pretty nice chapter.
