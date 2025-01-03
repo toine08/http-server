@@ -654,3 +654,34 @@ Here are the files created:
 
 #### Note:
 This one was really challenging. There were a lot of things to do, and I felt lost at times. I am not happy with my performance. Even though I knew where to add certain things, I didn't know how to use some functions. I had to rely heavily on AI. Maybe going all the way through the HTTP server wasn't the best idea...
+
+
+
+## Assignment 6.11
+This one was also a big one, here is the assignment and what I did.
+
+### Assignment:
+- Create a new database table called `refresh_tokens`.
+- Add a `func MakeRefreshToken() (string, error)` function to your `internal/auth` package. It should use the following to generate a random 256-bit (32-byte) hex-encoded string.
+- Update the `POST /api/login` endpoint to return a refresh token, as well as an access token:
+	```json
+	{
+		"id": "5a47789c-a617-444a-8a80-b50359247804",
+		"created_at": "2021-07-01T00:00:00Z",
+		"updated_at": "2021-07-01T00:00:00Z",
+		"email": "lane@example.com",
+		"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+		"refresh_token": "56aa826d22baab4b5ec2cea41a59ecbba03e542aedbb31d9b80326ac8ffcfa2a"
+	}
+	```
+- Create a `POST /api/refresh` endpoint. This new endpoint does not accept a request body but requires a refresh token to be present in the headers, in the same `Authorization: Bearer <token>` format.
+- Create a new `POST /api/revoke` endpoint. This new endpoint does not accept a request body but requires a refresh token to be present in the headers, in the same `Authorization: Bearer <token>` format.
+
+For the code, sadly there are too many things I have updated, but here is what I have updated and created:
+
+- Created new schema `004_add_refresh_tokens.sql` and `refresh_token.sql` for the queries.
+- Created new endpoint `handle_users_refresh.go` and `handle_users_revoke.go` and updated the `main.go` to add the routes.
+- Created new function `makeRefreshToken.go`.
+
+#### Note:
+This one was hard, but clearer than the previous one. I still had to use AI, but this was to insert debug and help to know how to use a function. I really enjoy coding in Go, but I know I have some improvements to make.
