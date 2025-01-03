@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (cfg *apiConfig) handleChipsById(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handleChirpsById(w http.ResponseWriter, r *http.Request) {
 	chirpId := r.PathValue("chirpID")
 	uuid, err := uuid.Parse(chirpId)
 	if err != nil {
@@ -15,7 +15,8 @@ func (cfg *apiConfig) handleChipsById(w http.ResponseWriter, r *http.Request) {
 	}
 	row, err := cfg.dbQueries.ChirpByID(r.Context(), uuid)
 	if err != nil {
-		respondWithError(w, 500, "Error there is no ID who match the chirp", err)
+		respondWithError(w, http.StatusNotFound, "Error there is no ID who match the chirp", err)
+		return
 	}
 	respondWithJSON(w, 200, Chirp{
 		ID:        row.ID,
