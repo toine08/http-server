@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -30,7 +29,7 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 	}
 
 	// Validate the extracted JWT
-	userID, err := auth.ValidateJWT(tokenString, os.Getenv("TOKEN_SECRET"))
+	userID, err := auth.ValidateJWT(tokenString, cfg.tokenSecret)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Invalid or expired token", nil)
 		return
@@ -79,7 +78,7 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 func validateChirp(body string) (string, error) {
 	const maxChirpLength = 140
 	if len(body) > maxChirpLength {
-		return "", errors.New("Chirp is too long")
+		return "", errors.New("validateChirp: Chirp is too long")
 	}
 
 	badWords := map[string]struct{}{
