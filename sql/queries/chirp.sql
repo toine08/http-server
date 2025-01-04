@@ -16,9 +16,21 @@ DELETE FROM chirps;
 SELECT * FROM chirps
 ORDER BY created_at ASC;
 
+-- name: AllChirpsDesc :many
+SELECT * FROM chirps
+ORDER BY created_at DESC;
+
 -- name: ChirpByID :one
 SELECT id, created_at, updated_at, body, user_id FROM chirps WHERE id = $1;
 
 -- name: DeleteChirpByID :one
 DELETE FROM chirps WHERE id = $1 AND user_id = $2
 RETURNING *;
+
+-- name: AllChirpsByUserID :many
+SELECT * FROM chirps where user_id = $1
+ORDER BY created_at ASC;
+
+-- name: AllChirpsByUserIDDesc :many
+SELECT * FROM chirps WHERE user_id = $1
+ORDER BY created_at DESC;
