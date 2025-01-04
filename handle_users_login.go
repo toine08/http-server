@@ -23,6 +23,7 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 		CreatedAt     time.Time `json:"created_at"`
 		UpdatedAt     time.Time `json:"updated_at"`
 		Email         string    `json:"email"`
+		ChirpySub     bool      `json:"is_chirpy_red"`
 		Token         string    `json:"token"`
 		Refresh_Token string    `json:"refresh_token"`
 	}
@@ -70,6 +71,7 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 		CreatedAt:     user.CreatedAt,
 		UpdatedAt:     user.UpdatedAt,
 		Email:         user.Email,
+		ChirpySub:     user.IsChirpyRed.Bool,
 		Token:         token,
 		Refresh_Token: refreshToken,
 	})

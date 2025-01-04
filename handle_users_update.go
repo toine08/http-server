@@ -21,6 +21,7 @@ func (cfg *apiConfig) handleUpdateUser(w http.ResponseWriter, req *http.Request)
 		Email     string    `json:"email"`
 		CreatedAt time.Time `json:"created_at"`
 		UpdatedAt time.Time `json:"updated_at"`
+		ChirpySub bool      `json:"is_chirpy_red"`
 	}
 
 	tokenString, err := auth.GetBearerToken(req.Header)
@@ -62,6 +63,7 @@ func (cfg *apiConfig) handleUpdateUser(w http.ResponseWriter, req *http.Request)
 		Email:     newUser.Email,
 		CreatedAt: newUser.CreatedAt,
 		UpdatedAt: newUser.UpdatedAt,
+		ChirpySub: newUser.IsChirpyRed.Bool,
 	}
 
 	respondWithJSON(w, http.StatusOK, response)
