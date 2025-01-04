@@ -18,6 +18,7 @@ type apiConfig struct {
 	dbQueries      *database.Queries
 	platform       string
 	tokenSecret    string
+	polkaKey       string
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -62,6 +63,7 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	plateform := os.Getenv("PLATEFORM")
 	tokenSecret := os.Getenv("TOKEN_SECRET")
+	polkaKey := os.Getenv("POLKA_KEY")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
@@ -69,6 +71,7 @@ func main() {
 	cfg := &apiConfig{
 		platform:       plateform,
 		tokenSecret:    tokenSecret,
+		polkaKey:       polkaKey,
 		fileserverHits: atomic.Int32{},
 	}
 	cfg.dbQueries = database.New(db)
@@ -100,6 +103,8 @@ func main() {
 	mux.HandleFunc("GET /api/chirps", cfg.handleAllChirps)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handleChirpsById)
 	mux.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.handleDeleteChirpsById)
+
+	mux.HandleFunc("POST /api/polka/webhooks", cfg.handleWebhooks)
 
 	// Start the server and listen on the specified port
 	server.ListenAndServe()
