@@ -908,3 +908,64 @@ For the implementation on handleWebooks you can see 8.1 !
 
 #### Note:
 I did this one alone, only to check if what I was doing was correct. I feel it was pretty nice to do it alone and I am happy for this success. 
+
+## Assignment 9.4
+
+### Assignment:
+Update the GET /api/chirps endpoint. It should accept an optional query parameter called sort. It can have 2 possible values:
+
+	asc - Sort the chirps in the response by created_at in ascending order
+	desc - Sort the chirps in the response by created_at in descending order
+
+asc is the default if no sort query parameter is provided.
+
+```go
+func (cfg *apiConfig) handleAllChirps(w http.ResponseWriter, req *http.Request) {
+	...
+	s := req.URL.Query().Get("author_id")
+	order := req.URL.Query().Get("sort")
+
+	if s == "" {
+		if order == "desc" {
+			rows, err = cfg.dbQueries.AllChirpsDesc(req.Context())
+			if err != nil {
+				respondWithError(w, 500, "Error retrieving data", err)
+				return
+			}
+		} else {
+			rows, err = cfg.dbQueries.AllChirps(req.Context())
+			if err != nil {
+				respondWithError(w, 500, "Error retrieving data", err)
+				return
+			}
+		}
+	} else {
+		userID, err := uuid.Parse(s)
+		if err != nil {
+			respondWithError(w, 400, "Invalid author_id", err)
+			return
+		}
+		if order == "desc" {
+			rows, err = cfg.dbQueries.AllChirpsByUserIDDesc(req.Context(), userID)
+			if err != nil {
+				respondWithError(w, 500, "Error retrieving data", err)
+				return
+			}
+		}
+	}
+...
+}
+```
+
+```sql
+-- name: AllChirpsDesc :many
+SELECT * FROM chirps
+ORDER BY created_at DESC;
+
+-- name: AllChirpsByUserIDDesc :many
+SELECT * FROM chirps WHERE user_id = $1
+ORDER BY created_at DESC;
+```
+
+#### Note:
+This was a nice one. I had to use AI for SQL queries but otherwise everything from my brain hehe.
