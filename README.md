@@ -813,3 +813,98 @@ RETURNING *;
 #### Note:
 
 Well this one was also not that hard but not easy. I have avoided to use AI but It's pretty useful for writing correct sql queries hehe. I am pretty proud of what I do and I haven't felt lost so that's cool. 
+
+
+## Assignment 8.1
+
+### Assignment:
+Add a migration to the users table to include a new column called `is_chirpy_red`. This column should be a boolean, and it should default to false.
+Add a database query that upgrades a user to Chirpy Red based on their ID.
+Add a POST /api/polka/webhooks endpoint. It should accept a request of this shape:
+Update all endpoints that return user resources to include the `is_chirpy_red` field.
+
+```go
+type data struct {
+    UserID uuid.UUID `json:"user_id"`
+}
+
+func (cfg *apiConfig) handleWebhooks(w http.ResponseWriter, req *http.Request) {
+    apiKey, err := auth.GetAPIKey(req.Header)
+    if err != nil {
+        respondWithError(w, http.StatusUnauthorized, "Error while retrieving the API key", err)
+        return
+    }
+
+    if apiKey != cfg.polkaKey {
+        respondWithError(w, http.StatusUnauthorized, "API key not matching", err)
+        return
+    }
+
+    type parameters struct {
+        Event string `json:"event"`
+        Data  data   `json:"data"`
+    }
+    decoder := json.NewDecoder(req.Body)
+    params := parameters{}
+    err = decoder.Decode(&params)
+    if err != nil {
+        respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
+        return
+    }
+    if params.Event == "user.upgraded" {
+        fmt.Printf("HERE IS THE PARAMS.EVENT: %v, and the ID: %v ", params.Event, params.Data.UserID)
+        _, err := cfg.dbQueries.UpdateChirpyById(req.Context(), params.Data.UserID)
+        if err != nil {
+            respondWithError(w, http.StatusNotFound, "Error while updating user", err)
+            return
+        }
+        respondWithJSON(w, http.StatusNoContent, "")
+    } else {
+        respondWithJSON(w, http.StatusNoContent, "")
+        return
+    }
+}
+
+```
+
+I have also created the new column in the users table and created a query to update the is_chirpy_red.
+
+#### Note:
+This one wasn't super hard and it was really nice to work on it. I had to use AI to verify the SQL query and update the users table but also to resolve an issue because the handleWebhooks wasn't sending the user ID correctly, so I needed to resolve this issue. But I was still happy I was able to do it almost all by myself.
+
+
+
+
+## Assignment 8.4
+
+### Assignment:
+Add a new secret value to your .env file called POLKA_KEY. This is the api key that polka will send so that we know it's them (and not someone else trying to get free Chirpy red). Load it into your server and store it in your apiConfig.
+
+Add a func GetAPIKey(headers http.Header) (string, error) to your auth package. It should extract the api key from the Authorization header, which is expected to be in this format:
+```
+Authorization: ApiKey THE_KEY_HERE
+```
+
+Update the POST /api/polka/webhooks endpoint. It should ensure that the API key in the header matches the one stored in the .env file. If it doesn't, the endpoint should respond with a 401 status code.
+
+```go
+func GetAPIKey(headers http.Header) (string, error) {
+	authorization := headers.Get("Authorization")
+
+	if authorization == "" {
+		return "", fmt.Errorf("Authorization header not found")
+	}
+
+	if !strings.HasPrefix(authorization, "ApiKey ") {
+		return "", fmt.Errorf("Invalid Authorization header format")
+	}
+
+	token := authorization[len("ApiKey "):]
+
+	return token, nil
+}
+```
+For the implementation on handleWebooks you can see 8.1 !
+
+#### Note:
+I did this one alone, only to check if what I was doing was correct. I feel it was pretty nice to do it alone and I am happy for this success. 
